@@ -6,6 +6,7 @@ import math
 # Constants
 WIDTH, HEIGHT = 1000, 800
 COLOR_RED = (255, 0, 0, 100)
+COLOR_BROWN = (139, 69, 19, 100)
 
 # Setup
 pygame.init()
@@ -49,6 +50,41 @@ def create_boundaries(space, width, height):
         space.add(body, shape)
 
 
+def create_structures(space, height):
+    rects = [
+        [(600, height - 120), (40, 200), COLOR_BROWN, 100],
+        [(900, height - 120), (40, 200), COLOR_BROWN, 100],
+        [(750, height - 240), (340, 40), COLOR_BROWN, 150],
+    ]
+
+    for pos, size, color, mass in rects:
+        body = pymunk.Body()
+        body.position = pos
+        shape = pymunk.Poly.create_box(body, size, radius=1)
+        shape.color = color
+        shape.mass = mass
+        shape.elasticity = 0.4
+        shape.friction = 0.4
+        space.add(body, shape)
+
+
+def create_swinging_ball(space):
+    rotation_center_body = pymunk.Body(body_type=pymunk.Body.STATIC)
+    rotation_center_body.position = (300, 300)
+
+    body = pymunk.Body()
+    body.position = (300, 300)
+    line = pymunk.Segment(body, (0, 0), (255, 0), 5)
+    circle = pymunk.Circle(body, 40, (255, 0))
+    line.friction = 1
+    circle.friction = 1
+    line.mass = 8
+    circle.mass = 30
+    circle.elasticity = 0.95
+    rotation_center_joint = pymunk.PinJoint(body, rotation_center_body, (0, 0), (0, 0))
+    space.add(circle, line, body, rotation_center_joint)
+
+
 def create_ball(space, radius, mass, pos):
     body = pymunk.Body(body_type=pymunk.Body.STATIC)
     body.position = pos
@@ -73,6 +109,8 @@ def main(window, width, height):
     space.gravity = (0, 981)
 
     create_boundaries(space, width, height)
+    create_structures(space, HEIGHT)
+    create_swinging_ball(space)
 
     pressed_pos = None
     ball = None
